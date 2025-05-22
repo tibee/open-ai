@@ -720,7 +720,7 @@ class OpenAi
 
             $this->stream_method = $stream;
         }
-        
+
         $this->addAssistantsBetaHeader();
         $url = Url::threadsUrl() . '/' . $threadId . '/runs';
         $this->baseUrl($url);
@@ -791,7 +791,7 @@ class OpenAi
 
             $this->stream_method = $stream;
         }
-        
+
         $this->addAssistantsBetaHeader();
         $url = Url::threadsUrl() . '/' . $threadId . '/runs/' . $runId . '/submit_tool_outputs';
         $this->baseUrl($url);
@@ -939,7 +939,7 @@ class OpenAi
             $this->headers[] = "OpenAI-Organization: $org";
         }
     }
-    
+
     /**
      * @param  string  $org
      */
@@ -953,10 +953,10 @@ class OpenAi
     /**
      * @return void
      */
-    private function addAssistantsBetaHeader(){ 
+    private function addAssistantsBetaHeader(){
         $this->headers[] = 'OpenAI-Beta: assistants='.$this->assistantsBetaVersion;
     }
-    
+
 
     /**
      * @param  string  $url
@@ -964,7 +964,7 @@ class OpenAi
      * @param  array   $opts
      * @return bool|string
      */
-    private function sendRequest(string $url, string $method, array $opts = [])
+    public function sendRequest(string $url, string $method, array $opts = [])
     {
         $post_fields = json_encode($opts);
 
@@ -1010,7 +1010,7 @@ class OpenAi
         if (! $response) {
             $error = curl_error($curl);
         }
-        
+
         curl_close($curl);
 
         if (! empty($error)) {
