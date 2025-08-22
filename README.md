@@ -434,6 +434,60 @@ echo($d->choices[0]->message->content);
 
 ## Completions
 
+## Responses API (New)
+
+The Responses API unifies text, image, and tool usage under a single endpoint and supports rich streaming events.
+
+Sync usage:
+
+```php
+$open_ai = new Orhanerday\OpenAi\OpenAi(getenv('OPENAI_API_KEY'));
+
+$response = $open_ai->responses([
+    'model' => 'gpt-4o-mini',
+    'input' => 'Write a haiku about the sea.',
+    // Optional: conversation id passthrough
+    // 'conversation' => 'conv_123',
+]);
+
+echo $response; // JSON response string
+```
+
+Streaming usage with SSE parser:
+
+```php
+use Orhanerday\OpenAi\ResponsesSSEParser;
+
+$open_ai = new Orhanerday\OpenAi\OpenAi(getenv('OPENAI_API_KEY'));
+
+$opts = [
+    'model' => 'gpt-4o-mini',
+    'input' => 'Stream a short poem line by line.',
+    'stream' => true,
+];
+
+header('Content-type: text/event-stream');
+header('Cache-Control: no-cache');
+
+$parser = new ResponsesSSEParser(function(array $event) {
+    // $event['event'] holds the SSE event name, e.g. response.output_text.delta
+    // $event['data'] is decoded JSON for that event, or the string "[DONE]" when finished
+    echo 'event: ' . $event['event'] . "\n";
+    echo 'data: ' . json_encode($event['data']) . "\n\n";
+    @ob_flush();
+    @flush();
+});
+
+$open_ai->responses($opts, function($curlInfo, $chunk) use ($parser) {
+    $parser->feed($chunk);
+    return strlen($chunk);
+});
+```
+
+Notes:
+- You can pass conversation => '<your_conversation_id>' to continue a conversation; the value is forwarded as-is to the API.
+- For tools, modalities, audio outputs and other advanced parameters, include them in the $opts array according to the OpenAI Responses API docs.
+
 Given a prompt, the model will return one or more predicted completions, and can also return the probabilities of
 alternative tokens at each position.
 

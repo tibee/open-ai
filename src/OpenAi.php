@@ -231,6 +231,33 @@ class OpenAi
     }
 
     /**
+     * Responses API
+     * @param array $opts
+     * @param null|callable $stream
+     * @return bool|string
+     * @throws Exception
+     */
+    public function responses($opts, $stream = null)
+    {
+        if (array_key_exists('stream', $opts) && $opts['stream']) {
+            if ($stream == null) {
+                throw new Exception(
+                    'Please provide a stream function. Check https://platform.openai.com/docs/api-reference/responses/streaming for an example.'
+                );
+            }
+
+            $this->stream_method = $stream;
+        }
+
+        // Default to chat model if not provided, since Responses can accept chat-capable models
+        $opts['model'] = $opts['model'] ?? $this->chatModel;
+        $url = Url::responsesUrl();
+        $this->baseUrl($url);
+
+        return $this->sendRequest($url, 'POST', $opts);
+    }
+
+    /**
      * @param $opts
      * @return bool|string
      */
